@@ -8,6 +8,7 @@ interface IProduct
     string Name { get; }
     int Stock { get; }
     int Price { get; }
+    string unit { get; }
     bool CanBuy();
     void DecreaseStock();
 
@@ -17,13 +18,15 @@ class Product : IProduct
     public string Name { get; private set; } //商品名
     public int Stock { get; private set; } //在庫数
     public int Price { get; private set; } //値段
+    public string unit { get; private set; } //単位
 
     //コンストラクタ
-    public Product(string name, int stock, int price)
+    public Product(string name, int stock, int price, string unit)
     {
         Name = name;
         Stock = stock;
         Price = price;
+        this.unit = unit;
     }
     //購入可能か判断するメソッド
     public bool CanBuy()
@@ -57,7 +60,7 @@ abstract class VendingMachineBase
 
     }//購入メソッド
     public void Buy(int index)
-    {　　//負数入力または、範囲外の場合
+    {//負数入力または、範囲外の場合
         if (index < 0 || index >= products.Count)
         {
             Console.WriteLine("指定された商品は存在しません。");
@@ -85,27 +88,27 @@ abstract class VendingMachineBase
         //売上
         totalSales += product.Price;
 
-        Console.WriteLine($"{product.Name}を購入しました。残り{product.Stock}本。残金: {insertedMoney}円");
+        Console.WriteLine($"{product.Name}を購入しました。残り{product.Stock}{product.unit}。残金: {insertedMoney}円");
         Console.WriteLine($"総売上高{totalSales}円");
     }
 }
-    
+
 class DrinkVendingMachine : VendingMachineBase
 {
     protected override void KProducts()
     {  //商品名・在庫・値段をリストに加える
-        products.Add(new Product("ファンタ", 10, 160));
-        products.Add(new Product("グレープ", 10, 170));
-        products.Add(new Product("コーラ", 10, 180));
+        products.Add(new Product("ファンタ", 10, 160,"本"));
+        products.Add(new Product("グレープ", 10, 170, "本"));
+        products.Add(new Product("コーラ", 10, 180, "本"));
     }
 }
 class SnackVendingMachine : VendingMachineBase
 {
     protected override void KProducts()
     { //商品名・在庫・値段をリストに加える
-        products.Add(new Product("アルフォート", 4, 120));
-        products.Add(new Product("雪の宿", 6, 130));
-        products.Add(new Product("ムーンライト", 8, 250));
+        products.Add(new Product("アルフォート", 4, 120, "個"));
+        products.Add(new Product("雪の宿", 6, 130, "個"));
+        products.Add(new Product("ムーンライト", 8, 250, "個"));
     }
 }
 
@@ -115,7 +118,7 @@ class Program
     static void Main()
     {
         Console.WriteLine("飲料用自動販売機");
-         VendingMachineBase DVM = new DrinkVendingMachine();
+        VendingMachineBase DVM = new DrinkVendingMachine();
         DVM.InsertMoney(500);
         DVM.Buy(0);
         DVM.Buy(1);
