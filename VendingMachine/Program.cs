@@ -3,7 +3,16 @@ using System.Collections.Generic;
 /*セッターとゲッターをつかう
  * ポリモーフィズムを利用する
  * カプセル化する*/
-class Product
+interface IProduct
+{
+    string Name { get; }
+    int Stock { get; }
+    int Price { get; }
+    bool CanBuy();
+    void DecreaseStock();
+
+}
+class Product : IProduct
 {
     public string Name { get; private set; } //商品名
     public int Stock { get; private set; } //在庫数
@@ -18,7 +27,7 @@ class Product
     }
     //購入可能か判断するメソッド
     public bool CanBuy()
-    {   //1以上ならture、0以下ならfalseを返す
+    {   //1以上ならtrue、0以下ならfalseを返す
         return Stock > 0;
     }
     //在庫を一つ減らす
@@ -28,23 +37,22 @@ class Product
     }
 
 }
-class VendingMachine
+//抽象クラス・共通処理
+abstract class VendingMachineBase
 {   //商品のリスト生成
-    private List<Product> products = new List<Product>(); //リスト作成
-    private int insertedMoney = 0;　//投入金額
-    private int totalSales = 0;　//売上金
+    protected List<IProduct> products = new List<IProduct>(); //リスト作成
+    protected int insertedMoney = 0; //投入金額
+    protected int totalSales = 0; //売上金
 
 
-    public VendingMachine()
-    {   //商品名・在庫・値段をリストに加える
-        products.Add(new Product("ファンタ", 10, 160));
-        products.Add(new Product("グレープ", 10, 170));
-        products.Add(new Product("コーラ", 10, 180));
+    public VendingMachineBase()
+    {
+        KProducts();
     }
-    //投入金額メソッド
+    protected abstract void KProducts();
     public void InsertMoney(int money)
     {   //引数を足していく
-        insertedMoney += money;　
+        insertedMoney += money;
         Console.WriteLine($"{money}円を投入しました。現在の投入額: {insertedMoney}円");
 
     }//購入メソッド
@@ -56,7 +64,7 @@ class VendingMachine
             return;
         }
         //リストの情報をProduct型のproductに入れる
-        Product product = products[index];
+        IProduct product = products[index];
         //在庫がない場合(falesが返ってきた場合！でtureになる)
         if (!product.CanBuy())
         {
@@ -69,6 +77,7 @@ class VendingMachine
             Console.WriteLine($"{product.Name}は{product.Price}円ですが、投入額が足りません。");
             return;
         }
+        //投入金額メソッド
         //在庫を減らすメソッドを呼び出す
         product.DecreaseStock();
         //投入金額-価格
@@ -77,6 +86,26 @@ class VendingMachine
         totalSales += product.Price;
 
         Console.WriteLine($"{product.Name}を購入しました。残り{product.Stock}本。残金: {insertedMoney}円");
+        Console.WriteLine($"総売上高{totalSales}円");
+    }
+}
+    
+class DrinkVendingMachine : VendingMachineBase
+{
+    protected override void KProducts()
+    {  //商品名・在庫・値段をリストに加える
+        products.Add(new Product("ファンタ", 10, 160));
+        products.Add(new Product("グレープ", 10, 170));
+        products.Add(new Product("コーラ", 10, 180));
+    }
+}
+class SnackVendingMachine : VendingMachineBase
+{
+    protected override void KProducts()
+    { //商品名・在庫・値段をリストに加える
+        products.Add(new Product("アルフォート", 4, 120));
+        products.Add(new Product("雪の宿", 6, 130));
+        products.Add(new Product("ムーンライト", 8, 250));
     }
 }
 
@@ -85,12 +114,19 @@ class Program
 {
     static void Main()
     {
+        Console.WriteLine("飲料用自動販売機");
+         VendingMachineBase DVM = new DrinkVendingMachine();
+        DVM.InsertMoney(500);
+        DVM.Buy(0);
+        DVM.Buy(1);
+        DVM.Buy(2);
 
-        VendingMachine VM = new VendingMachine();
-        VM.InsertMoney(500);
-        VM.Buy(0);
-        VM.Buy(1);
-        VM.Buy(2);
+        Console.WriteLine("軽食用自動販売機");
+        VendingMachineBase SVM = new SnackVendingMachine();
+        SVM.InsertMoney(500);
+        SVM.Buy(0);
+        SVM.Buy(1);
+        SVM.Buy(2);
     }
 }
 
